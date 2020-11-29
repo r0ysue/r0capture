@@ -1,4 +1,4 @@
-# r0cap
+# r0capture
 
 安卓应用层抓包通杀脚本
 
@@ -15,11 +15,11 @@
 
 - Spawn 模式：
 
-`$ python r0capture.py -U -f com.qiyi.video`
+`$ python3 r0capture.py -U -f com.qiyi.video`
 
 - Attach 模式，抓包内容保存成pcap文件供后续分析：
 
-`$ python r0capture.py -U com.qiyi.video -p iqiyi.pcap`
+`$ python3 r0capture.py -U com.qiyi.video -p iqiyi.pcap`
 
 建议使用`Attach`模式，从感兴趣的地方开始抓包，并且保存成`pcap`文件，供后续使用Wireshark进行分析。
 
