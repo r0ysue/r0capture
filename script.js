@@ -203,6 +203,7 @@ if (Java.available) {
       for (var i = 0; i < byteCount; ++i)
         Memory.writeS8(ptr.add(i), bytearry[offset + i]);
       send(message, Memory.readByteArray(ptr, byteCount))
+      return result;
     }
     Java.use("java.net.SocketInputStream").socketRead0.overload('java.io.FileDescriptor', '[B', 'int', 'int', 'int').implementation = function (fd, bytearry, offset, byteCount, timeout) {
       var result = this.socketRead0(fd, bytearry, offset, byteCount, timeout);
@@ -219,6 +220,7 @@ if (Java.available) {
           Memory.writeS8(ptr.add(i), bytearry[offset + i]);
         send(message, Memory.readByteArray(ptr, result))
       }
+      return result;
     }
   })
 }
