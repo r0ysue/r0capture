@@ -28,7 +28,7 @@ __author__ = "geffner@google.com (Jason Geffner)"
 __version__ = "2.0"
 
 """
-# r0cap
+# r0capture
 
 ID: r0ysue 
 
@@ -73,6 +73,56 @@ try:
     import hexdump  # pylint: disable=g-import-not-at-top
 except ImportError:
     pass
+try:
+    from shutil import get_terminal_size as get_terminal_size
+except:
+    try:
+        from backports.shutil_get_terminal_size import get_terminal_size as get_terminal_size
+    except:
+        pass
+
+
+try:
+    import click
+except:
+    class click:
+        @staticmethod
+        def secho(message=None, **kwargs):
+            print(message)
+        @staticmethod
+        def style(**kwargs):
+            raise Exception("unsupported style")
+
+banner = """
+--------------------------------------------------------------------------------------------
+           .oooo.                                      .                                  
+          d8P'`Y8b                                   .o8                                  
+oooo d8b 888    888  .ooooo.   .oooo.   oo.ooooo.  .o888oo oooo  oooo  oooo d8b  .ooooo.  
+`888""8P 888    888 d88' `"Y8 `P  )88b   888' `88b   888   `888  `888  `888""8P d88' `88b 
+ 888     888    888 888        .oP"888   888   888   888    888   888   888     888ooo888 
+ 888     `88b  d88' 888   .o8 d8(  888   888   888   888 .  888   888   888     888    .o 
+d888b     `Y8bd8P'  `Y8bod8P' `Y888""8o  888bod8P'   "888"  `V88V"V8P' d888b    `Y8bod8P' 
+                                         888                                              
+                                        o888o                                                                                                                                       
+                    https://github.com/r0ysue/r0capture
+                    vxid:r0ysue
+--------------------------------------------------------------------------------------------\n
+"""
+
+
+def show_banner():
+    colors = ['bright_red', 'bright_green', 'bright_blue', 'cyan', 'magenta']
+    try:
+        click.style('color test', fg='bright_red')
+    except:
+        colors = ['red', 'green', 'blue', 'cyan', 'magenta']
+    try:
+        columns = get_terminal_size().columns
+        if columns >= len(banner.splitlines()[1]):
+            for line in banner.splitlines():
+                click.secho(line, fg=random.choice(colors))
+    except:
+        pass
 
 # ssl_session[<SSL_SESSION id>] = (<bytes sent by client>,
 #                                  <bytes sent by server>)
@@ -252,6 +302,7 @@ def ssl_log(process, pcap=None, verbose=False, isUsb=False, ssllib="", isSpawn=T
     sys.stdin.read()
 
 if __name__ == "__main__":
+    show_banner()
     class ArgParser(argparse.ArgumentParser):
 
         def error(self, message):
