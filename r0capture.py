@@ -240,7 +240,10 @@ def ssl_log(process, pcap=None, verbose=False, isUsb=False, ssllib="", isSpawn=T
                      p["src_port"], p["dst_addr"], p["dst_port"], data)
 
     if isUsb:
-        device = frida.get_usb_device()
+        try:
+            device = frida.get_usb_device()
+        except:
+            device = frida.get_remote_device()
         # session = device.attach(process)
     else:
         device = frida.get_local_device()
