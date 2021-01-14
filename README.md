@@ -29,13 +29,13 @@
 
 建议使用`Attach`模式，从感兴趣的地方开始抓包，并且保存成`pcap`文件，供后续使用Wireshark进行分析。
 
-![](pic\Sample.PNG)
+![](pic/Sample.PNG)
 
 - 收发包函数定位：`Spawn`和`attach`模式均默认开启；
 
 > 可以使用`python r0capture.py -U -f cn.soulapp.android -v  >> soul3.txt`这样的命令将输出重定向至txt文件中稍后过滤内容
 
-![](pic\locator.png)
+![](pic/locator.png)
 
 - 客户端证书导出功能：默认开启；必须以Spawm模式运行；
 
@@ -45,17 +45,17 @@
 
 > 导出后的证书位于/sdcard/Download/包名xxx.p12路径，导出多次，每一份均可用，密码默认为：r0ysue，推荐使用[keystore-explorer](http://keystore-explorer.org/)打开查看证书。
 
-![](pic\clientcer.png)
+![](pic/clientcer.png)
 
 - SSL pinning 代码定位功能（混淆后亦可）：默认开启；必须以Spawm模式运行；
 
 > 并不是所有的App都部署了证书绑定的功能，只有部署了的才可以定位到
 
-![](pic\sslunpinningcer.png)
+![](pic/sslunpinningcer.png)
 
 > 定位到经过混淆后的证书绑定器是z1.g.a方法之后用frida来过掉即可
 
-![](pic\bypass.png)
+![](pic/bypass.png)
 
 
 PS：
