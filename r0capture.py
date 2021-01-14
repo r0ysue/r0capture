@@ -218,9 +218,11 @@ def ssl_log(process, pcap=None, verbose=False, isUsb=False, ssllib="", isSpawn=T
             pprint.pprint(message)
             os.kill(os.getpid(), signal.SIGTERM)
             return
-        if len(data) == 0:
+        if len(data) == 1:
+            print(message["payload"]["function"])
+            print(message["payload"]["stack"])
             return
-        p = message["payload"]
+        p = message["payload"]        
         if verbose:
             src_addr = socket.inet_ntop(socket.AF_INET,
                                         struct.pack(">I", p["src_addr"]))
@@ -234,13 +236,16 @@ def ssl_log(process, pcap=None, verbose=False, isUsb=False, ssllib="", isSpawn=T
                 dst_addr,
                 p["dst_port"]))
             hexdump.hexdump(data)
-            print()
+            print(p["stack"])
         if pcap:
             log_pcap(pcap_file, p["ssl_session_id"], p["function"], p["src_addr"],
                      p["src_port"], p["dst_addr"], p["dst_port"], data)
 
     if isUsb:
-        device = frida.get_usb_device()
+        try:
+            device = frida.get_usb_device()
+        except:
+            device = frida.get_remote_device()
         # session = device.attach(process)
     else:
         device = frida.get_local_device()
