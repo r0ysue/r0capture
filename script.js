@@ -308,7 +308,7 @@ if (Java.available) {
       return result;
     }
 
-    if (parseInt(Java.androidVersion) >= 8) {
+    if (parseFloat(Java.androidVersion)  > 8) {
       Java.use("com.android.org.conscrypt.ConscryptFileDescriptorSocket$SSLOutputStream").write.overload('[B', 'int', 'int').implementation = function (bytearry, int1, int2) {
         var result = this.write(bytearry, int1, int2);
         SSLstackwrite = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
