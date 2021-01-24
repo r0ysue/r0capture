@@ -15,7 +15,6 @@
 
 - 增加App收发包函数定位功能
 - 增加App客户端证书导出功能
-- 增加SSL pinning代码定位功能
 
 ## 用法
 
@@ -46,16 +45,6 @@
 > 导出后的证书位于/sdcard/Download/包名xxx.p12路径，导出多次，每一份均可用，密码默认为：r0ysue，推荐使用[keystore-explorer](http://keystore-explorer.org/)打开查看证书。
 
 ![](pic/clientcer.png)
-
-- SSL pinning 代码定位功能（混淆后亦可）：默认开启；必须以Spawm模式运行；
-
-> 并不是所有的App都部署了证书绑定的功能，只有部署了的才可以定位到
-
-![](pic/sslunpinningcer.png)
-
-> 定位到经过混淆后的证书绑定器是z1.g.a方法之后用frida来过掉即可
-
-![](pic/bypass.png)
 
 
 PS：
