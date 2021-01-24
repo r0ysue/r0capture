@@ -9,6 +9,7 @@
 - 通杀TCP/IP四层模型中的应用层中的全部协议；
 - 通杀协议包括：Http,WebSocket,Ftp,Xmpp,Imap,Smtp,Protobuf等等、以及它们的SSL版本；
 - 通杀所有应用层框架，包括HttpUrlConnection、Okhttp1/3/4、Retrofit/Volley等等；
+- 无视加固，不管是整体壳还是二代壳或VMP，不用考虑加固的事情；
 - 如果有抓不到的情况欢迎提issue，或者直接加vx：r0ysue，进行反馈~
 
 ### January.14th 2021 update：增加几个辅助功能
