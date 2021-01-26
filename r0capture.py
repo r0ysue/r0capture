@@ -128,7 +128,7 @@ def show_banner():
 ssl_sessions = {}
 
 
-def ssl_log(process, pcap=None, verbose=False, isUsb=False, ssllib="", isSpawn=True, wait=0):
+def ssl_log(process, pcap=None, host=False, verbose=False, isUsb=False, ssllib="", isSpawn=True, wait=0):
     """Decrypts and logs a process's SSL traffic.
     Hooks the functions SSL_read() and SSL_write() in a given process and logs
     the decrypted data to the console and/or to a pcap file.
@@ -246,9 +246,12 @@ def ssl_log(process, pcap=None, verbose=False, isUsb=False, ssllib="", isSpawn=T
             device = frida.get_usb_device()
         except:
             device = frida.get_remote_device()
-        # session = device.attach(process)
     else:
-        device = frida.get_local_device()
+        if host:
+            manager = frida.get_device_manager()
+            device = manager.add_remote_device(host)
+        else:
+            device = frida.get_local_device()
 
     if isSpawn:
         pid = device.spawn([process])
@@ -334,6 +337,8 @@ Examples:
     args = parser.add_argument_group("Arguments")
     args.add_argument("-pcap", '-p', metavar="<path>", required=False,
                       help="Name of PCAP file to write")
+    args.add_argument("-host", '-H', metavar="<192.168.1.1:27042>", required=False,
+                      help="connect to remote frida-server on HOST")
     args.add_argument("-verbose","-v",  required=False, action="store_const", default=True,
                       const=True, help="Show verbose output")
     args.add_argument("process", metavar="<process name | process id>",
@@ -348,4 +353,13 @@ Examples:
                       help="Time to wait for the process")
 
     parsed = parser.parse_args()
-    ssl_log(int(parsed.process) if parsed.process.isdigit() else parsed.process, parsed.pcap, parsed.verbose, isUsb=parsed.isUsb, isSpawn=parsed.isSpawn, ssllib=parsed.ssl, wait=parsed.wait)
+    ssl_log(
+        int(parsed.process) if parsed.process.isdigit() else parsed.process, 
+    parsed.pcap, 
+    parsed.host,
+    parsed.verbose, 
+    isUsb=parsed.isUsb, 
+    isSpawn=parsed.isSpawn, 
+    ssllib=parsed.ssl, 
+    wait=parsed.wait
+    )
