@@ -16,6 +16,7 @@
 
 - 增加App收发包函数定位功能
 - 增加App客户端证书导出功能
+- 新增host连接方式“-H”，用于Frida-server监听在非标准端口时的连接
 
 ## 用法
 
@@ -46,6 +47,10 @@
 > 导出后的证书位于/sdcard/Download/包名xxx.p12路径，导出多次，每一份均可用，密码默认为：r0ysue，推荐使用[keystore-explorer](http://keystore-explorer.org/)打开查看证书。
 
 ![](pic/clientcer.png)
+
+- 新增host连接方式“-H”，用于Frida-server监听在非标准端口时的连接
+
+![](pic/difport.png)
 
 
 PS：
