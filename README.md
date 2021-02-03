@@ -48,7 +48,7 @@
 
 ![](pic/clientcer.png)
 
-- 新增host连接方式“-H”，用于Frida-server监听在非标准端口时的连接
+- 新增host连接方式“-H”，用于Frida-server监听在非标准端口时的连接。有些App会检测Frida标准端口，因此frida-server开在非标准端口可以绕过检测。
 
 ![](pic/difport.png)
 
