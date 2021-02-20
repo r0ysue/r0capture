@@ -59,6 +59,7 @@ import socket
 import struct
 import time
 import sys
+from pathlib import Path
 
 import frida
 
@@ -284,7 +285,7 @@ def ssl_log(process, pcap=None, host=False, verbose=False, isUsb=False, ssllib="
                 ("=I", 228)):  # Data link type (LINKTYPE_IPV4)
             pcap_file.write(struct.pack(writes[0], writes[1]))
 
-    with open("./script.js", encoding="utf-8") as f:
+    with open(Path(__file__).resolve().parent.joinpath("./script.js"), encoding="utf-8") as f:
         _FRIDA_SCRIPT = f.read()
         # _FRIDA_SCRIPT = session.create_script(content)
         # print(_FRIDA_SCRIPT)
