@@ -52,6 +52,11 @@
 
 ![](pic/difport.png)
 
+## 感谢[爱吃菠菜](https://bbs.pediy.com/user-760871.htm)巨巨总结的本项目知识点
+
+![](pic/summary1.jpg)
+![](pic/summary2.jpg)
+
 
 PS：
 
