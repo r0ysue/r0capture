@@ -24,9 +24,6 @@ var SSLstackread = null;
 
 var libname = "*libssl*";
 
-var HttpsMessage = {}
-
-
 function uuid(len, radix) {
   var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
   var uuid = [], i;
@@ -193,10 +190,9 @@ Interceptor.attach(addresses["SSL_read"],
   {
     onEnter: function (args) {
       var message = getPortsAndAddresses(SSL_get_fd(args[0]), true);
-      var session_id = getSslSessionId(args[0]);
-      this.session_id = session_id;
-      message["ssl_session_id"] = session_id;
+      message["ssl_session_id"] = getSslSessionId(args[0]);
       message["function"] = "SSL_read";
+      message["stack"] = SSLstackread;
       this.message = message;
       this.buf = args[1];
     },
@@ -205,11 +201,7 @@ Interceptor.attach(addresses["SSL_read"],
       if (retval <= 0) {
         return;
       }
-      //send(this.message, Memory.readByteArray(this.buf, retval));
-      HttpsMessage["read" + this.session_id] = {
-        "SSL_read_message": this.message,
-        "SSL_read_content": Memory.readByteArray(this.buf, retval),
-    }
+      send(this.message, Memory.readByteArray(this.buf, retval));
     }
   });
 
@@ -217,15 +209,10 @@ Interceptor.attach(addresses["SSL_write"],
   {
     onEnter: function (args) {
       var message = getPortsAndAddresses(SSL_get_fd(args[0]), false);
-      var session_id = getSslSessionId(args[0]);
-      message["ssl_session_id"] = session_id;
+      message["ssl_session_id"] = getSslSessionId(args[0]);
       message["function"] = "SSL_write";
-      //message["stack"] = SSLstackwrite;
-      //send(message, Memory.readByteArray(args[1], parseInt(args[2])));
-      HttpsMessage["write" + session_id] = {
-        "SSL_write_message": message,
-        "SSL_write_content": Memory.readByteArray(args[1], parseInt(args[2])),
-    }
+      message["stack"] = SSLstackwrite;
+      send(message, Memory.readByteArray(args[1], parseInt(args[2])));
     },
     onLeave: function (retval) {
     }
@@ -233,8 +220,6 @@ Interceptor.attach(addresses["SSL_write"],
 
 if (Java.available) {
   Java.perform(function () {
-    var ByteString = Java.use("com.android.okhttp.okio.ByteString");
-
     function storeP12(pri, p7, p12Path, p12Password) {
       var X509Certificate = Java.use("java.security.cert.X509Certificate")
       var p7X509 = Java.cast(p7, X509Certificate);
@@ -326,45 +311,24 @@ if (Java.available) {
     if (parseFloat(Java.androidVersion)  > 8) {
       Java.use("com.android.org.conscrypt.ConscryptFileDescriptorSocket$SSLOutputStream").write.overload('[B', 'int', 'int').implementation = function (bytearry, int1, int2) {
         var result = this.write(bytearry, int1, int2);
-        //SSLstackwrite = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
-        var session_id = ByteString.of(this.this$0.value.sslSession.value.getId()).hex().toUpperCase();
-        var SSLstackread = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
-        if (HttpsMessage["write" + session_id]){
-          HttpsMessage["write" + session_id]["SSLstackread"] = SSLstackread;
-        }
+        SSLstackwrite = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
         return result;
       }
       Java.use("com.android.org.conscrypt.ConscryptFileDescriptorSocket$SSLInputStream").read.overload('[B', 'int', 'int').implementation = function (bytearry, int1, int2) {
         var result = this.read(bytearry, int1, int2);
-        //SSLstackread = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
-        var session_id = ByteString.of(this.this$0.value.sslSession.value.getId()).hex().toUpperCase();
-        var SSLstackread = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
-        if (HttpsMessage["read" + session_id]){
-          HttpsMessage["read" + session_id]["SSLstackread"] = SSLstackread;
-        }
-
+        SSLstackread = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
         return result;
       }
     }
     else {
       Java.use("com.android.org.conscrypt.OpenSSLSocketImpl$SSLOutputStream").write.overload('[B', 'int', 'int').implementation = function (bytearry, int1, int2) {
         var result = this.write(bytearry, int1, int2);
-        //SSLstackwrite = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
-        var session_id = ByteString.of(this.this$0.value.sslSession.value.getId()).hex().toUpperCase();
-        var SSLstackread = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
-        if (HttpsMessage["write" + session_id]){
-          HttpsMessage["write" + session_id]["SSLstackread"] = SSLstackread;
-        }
+        SSLstackwrite = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
         return result;
       }
       Java.use("com.android.org.conscrypt.OpenSSLSocketImpl$SSLInputStream").read.overload('[B', 'int', 'int').implementation = function (bytearry, int1, int2) {
         var result = this.read(bytearry, int1, int2);
-        //SSLstackread = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
-        var session_id = ByteString.of(this.this$0.value.sslSession.value.getId()).hex().toUpperCase();
-        var SSLstackread = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
-        if (HttpsMessage["read" + session_id]){
-          HttpsMessage["read" + session_id]["SSLstackread"] = SSLstackread;
-        }
+        SSLstackread = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
         return result;
       }
 
@@ -373,24 +337,3 @@ if (Java.available) {
 
   )
 }
-
-
-function send_https(){
-  for(var session_id in HttpsMessage){
-      var obj = HttpsMessage[session_id]
-      if (Object.keys(obj).indexOf("SSLstackread") != -1){
-          if (obj["SSL_write_message"]){
-              var message = obj["SSL_write_message"]
-              message["stack"] = obj["SSLstackread"]
-              send(message, obj["SSL_write_content"])
-          }else{
-              var message = obj["SSL_read_message"]
-              message["stack"] = obj["SSLstackread"]
-              send(message, obj["SSL_read_content"])
-
-          }
-          delete HttpsMessage[session_id]
-      }
-  }
-}
-setInterval(send_https,500)
