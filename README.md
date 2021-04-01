@@ -20,6 +20,10 @@
 
 ## 用法
 
+- 推荐环境：[https://github.com/r0ysue/AndroidSecurityStudy/blob/master/FRIDA/A01/README.md](https://github.com/r0ysue/AndroidSecurityStudy/blob/master/FRIDA/A01/README.md)
+
+切记仅限安卓平台7、8、9、10、11 可用 ，禁止使用模拟器。
+
 - Spawn 模式：
 
 `$ python3 r0capture.py -U -f com.qiyi.video -v`
