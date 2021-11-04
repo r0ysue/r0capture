@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time : 2021/10/9 4:23 下午
-# @Author : chenxiangan
-# @File : myhexdump.py
-# @Software: PyCharm
 # !/usr/bin/env python
 # -*- coding: latin-1 -*-
 
