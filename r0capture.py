@@ -92,7 +92,6 @@ except:
         @staticmethod
         def style(**kwargs):
             raise Exception("unsupported style")
-logger.add("file_{time}.log", rotation="500MB", encoding="utf-8", enqueue=True, retention="10 days")
 banner = """
 --------------------------------------------------------------------------------------------
            .oooo.                                      .                                  
@@ -361,6 +360,8 @@ Examples:
                       help="Time to wait for the process")
 
     parsed = parser.parse_args()
+    logger.add(f"{parsed.process.replace('.','_')}-{int(time.time())}.log", rotation="500MB", encoding="utf-8", enqueue=True, retention="10 days")
+
     ssl_log(
         int(parsed.process) if parsed.process.isdigit() else parsed.process,
         parsed.pcap,
