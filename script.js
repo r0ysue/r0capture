@@ -258,7 +258,7 @@ if (Java.available) {
       return result;
     }
 
-    //SSLpinning helper 帮助定位证书绑定的关键代码
+    //SSLpinning helper 帮助定位证书绑定的关键代码a
     Java.use("java.io.File").$init.overload('java.io.File', 'java.lang.String').implementation = function (file, cert) {
       var result = this.$init(file, cert)
       var stack = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new());
