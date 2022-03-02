@@ -81,8 +81,15 @@ for from https://github.com/google/ssl_logger
 2. 调整JS脚本，使其适配iOS和macOS，同时也兼容了Android；
 3. 增加了更多的选项，使其能在多种情况下使用；
 
+### 安装依赖
+```
+Python版本>=3.6
+pip install loguru
+pip install click
+```
 ### Usage
   ```shell
     python3 ./ssl_logger.py  -U -f com.bfc.mm
     python3 ./ssl_logger.py -v  -p test.pcap  6666
   ````
+

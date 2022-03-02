@@ -45,23 +45,22 @@ https://github.com/r0ysue/r0capture
 - 通杀所有应用层框架，包括HttpUrlConnection、Okhttp1/3/4、Retrofit/Volley等等；
 """
 
-
 # Windows版本需要安装库：
 # pip install 'win_inet_pton'
 # pip install hexdump
 import argparse
 import os
-import platform
 import pprint
 import random
 import signal
 import socket
 import struct
-import time
 import sys
+import time
 from pathlib import Path
 
 import frida
+from loguru import logger
 
 try:
     if os.name == 'nt':
@@ -71,7 +70,7 @@ except ImportError:
     pass
 
 try:
-    import hexdump  # pylint: disable=g-import-not-at-top
+    import myhexdump as hexdump # pylint: disable=g-import-not-at-top
 except ImportError:
     pass
 try:
@@ -82,7 +81,6 @@ except:
     except:
         pass
 
-
 try:
     import click
 except:
@@ -90,10 +88,10 @@ except:
         @staticmethod
         def secho(message=None, **kwargs):
             print(message)
+
         @staticmethod
         def style(**kwargs):
             raise Exception("unsupported style")
-
 banner = """
 --------------------------------------------------------------------------------------------
            .oooo.                                      .                                  
@@ -123,6 +121,7 @@ def show_banner():
                 click.secho(line, fg=random.choice(colors))
     except:
         pass
+
 
 # ssl_session[<SSL_SESSION id>] = (<bytes sent by client>,
 #                                  <bytes sent by server>)
@@ -216,28 +215,31 @@ def ssl_log(process, pcap=None, host=False, verbose=False, isUsb=False, ssllib="
           data: The string of captured decrypted data.
         """
         if message["type"] == "error":
-            pprint.pprint(message)
+            logger.info(f"{message}")
             os.kill(os.getpid(), signal.SIGTERM)
             return
         if len(data) == 1:
-            print(message["payload"]["function"])
-            print(message["payload"]["stack"])
+            logger.info(f'{message["payload"]["function"]}')
+            logger.info(f'{message["payload"]["stack"]}')
             return
-        p = message["payload"]        
+        p = message["payload"]
         if verbose:
             src_addr = socket.inet_ntop(socket.AF_INET,
                                         struct.pack(">I", p["src_addr"]))
             dst_addr = socket.inet_ntop(socket.AF_INET,
                                         struct.pack(">I", p["dst_addr"]))
-            print("SSL Session: " + p["ssl_session_id"])
-            print("[%s] %s:%d --> %s:%d" % (
+            session_id = p['ssl_session_id']
+            logger.info(f"SSL Session: {session_id}")
+            logger.info("[%s] %s:%d --> %s:%d" % (
                 p["function"],
                 src_addr,
                 p["src_port"],
                 dst_addr,
                 p["dst_port"]))
-            hexdump.hexdump(data)
-            print(p["stack"])
+            gen = hexdump.hexdump(data, result="generator",only_str=True)
+            str_gen = ''.join(gen)
+            logger.info(f"{str_gen}")
+            logger.info(f"{p['stack']}")
         if pcap:
             log_pcap(pcap_file, p["ssl_session_id"], p["function"], p["src_addr"],
                      p["src_port"], p["dst_addr"], p["dst_port"], data)
@@ -264,7 +266,7 @@ def ssl_log(process, pcap=None, host=False, verbose=False, isUsb=False, ssllib="
         print("attach")
         session = device.attach(process)
     if wait > 0:
-        print("wait for {} seconds".format(wait))
+        print(f"wait for {wait} seconds")
         time.sleep(wait)
 
     # session = frida.attach(process)
@@ -305,12 +307,16 @@ def ssl_log(process, pcap=None, host=False, verbose=False, isUsb=False, ssllib="
             pcap_file.flush()
             pcap_file.close()
         exit()
+
     signal.signal(signal.SIGINT, stoplog)
     signal.signal(signal.SIGTERM, stoplog)
     sys.stdin.read()
 
+
 if __name__ == "__main__":
     show_banner()
+
+
     class ArgParser(argparse.ArgumentParser):
 
         def error(self, message):
@@ -340,7 +346,7 @@ Examples:
                       help="Name of PCAP file to write")
     args.add_argument("-host", '-H', metavar="<192.168.1.1:27042>", required=False,
                       help="connect to remote frida-server on HOST")
-    args.add_argument("-verbose","-v",  required=False, action="store_const", default=True,
+    args.add_argument("-verbose", "-v", required=False, action="store_const", default=True,
                       const=True, help="Show verbose output")
     args.add_argument("process", metavar="<process name | process id>",
                       help="Process whose SSL calls to log")
@@ -354,13 +360,15 @@ Examples:
                       help="Time to wait for the process")
 
     parsed = parser.parse_args()
+    logger.add(f"{parsed.process.replace('.','_')}-{int(time.time())}.log", rotation="500MB", encoding="utf-8", enqueue=True, retention="10 days")
+
     ssl_log(
-        int(parsed.process) if parsed.process.isdigit() else parsed.process, 
-    parsed.pcap, 
-    parsed.host,
-    parsed.verbose, 
-    isUsb=parsed.isUsb, 
-    isSpawn=parsed.isSpawn, 
-    ssllib=parsed.ssl, 
-    wait=parsed.wait
+        int(parsed.process) if parsed.process.isdigit() else parsed.process,
+        parsed.pcap,
+        parsed.host,
+        parsed.verbose,
+        isUsb=parsed.isUsb,
+        isSpawn=parsed.isSpawn,
+        ssllib=parsed.ssl,
+        wait=parsed.wait
     )
