@@ -1,95 +1,83 @@
 # r0capture
 
-安卓应用层抓包通杀脚本
+Android application layer packet capture script
 
-## 简介
+## Introduction
 
-- 仅限安卓平台，测试安卓7、8、9、10、11 可用 ；
-- 无视所有证书校验或绑定，不用考虑任何证书的事情；
-- 通杀TCP/IP四层模型中的应用层中的全部协议；
-- 通杀协议包括：Http,WebSocket,Ftp,Xmpp,Imap,Smtp,Protobuf等等、以及它们的SSL版本；
-- 通杀所有应用层框架，包括HttpUrlConnection、Okhttp1/3/4、Retrofit/Volley等等；
-- 无视加固，不管是整体壳还是二代壳或VMP，不用考虑加固的事情；
-- 如果有抓不到的情况欢迎提issue，或者直接加vx：r0ysue，进行反馈~
+- Android platform only, tested on Android 7, 8, 9, 10, 11;
+- Ignore all certificate verification or binding, regardless of any certificate matters;
+- Through capturing all protocols in the application layer in the TCP/IP four-layer model;
+- Captures all protocols including: Http, WebSocket, Ftp, Xmpp, Imap, Smtp, Protobuf, etc., and their SSL versions;
+- Captures all application layer frameworks, including HttpUrlConnection, Okhttp1/3/4, Retrofit/Volley, etc.;
 
-### January.14th 2021 update：增加几个辅助功能
+## Usage
 
-- 增加App收发包函数定位功能
-- 增加App客户端证书导出功能
-- 新增host连接方式“-H”，用于Frida-server监听在非标准端口时的连接
+- Recommended environment: [https://github.com/r0ysue/AndroidSecurityStudy/blob/master/FRIDA/A01/README.md](https://github.com/r0ysue/AndroidSecurityStudy/blob/master/FRIDA/A01/README.md)
 
-## 用法
+Remember that it is only available on Android platforms 7, 8, 9, 10, 11, and emulators are prohibited.
 
-- 推荐环境：[https://github.com/r0ysue/AndroidSecurityStudy/blob/master/FRIDA/A01/README.md](https://github.com/r0ysue/AndroidSecurityStudy/blob/master/FRIDA/A01/README.md)
+- Spawn mode:
 
-切记仅限安卓平台7、8、9、10、11 可用 ，禁止使用模拟器。
+```
+$ python3 r0capture.py -U -f com.qiyi.video -v
+```
 
-- Spawn 模式：
+- In Attach mode, the captured packet content is saved as a pcap file for subsequent analysis:
 
-`$ python3 r0capture.py -U -f com.qiyi.video -v`
+```
+$ python3 r0capture.py -U com.qiyi.video -v -p iqiyi.pcap
+```
 
-- Attach 模式，抓包内容保存成pcap文件供后续分析：
-
-`$ python3 r0capture.py -U com.qiyi.video -v -p iqiyi.pcap`
-
-建议使用`Attach`模式，从感兴趣的地方开始抓包，并且保存成`pcap`文件，供后续使用Wireshark进行分析。
+It is recommended to use the `Attach` mode, start capturing packets from the place of interest, and save it as a `pcap` file for subsequent analysis with Wireshark.
 
 ![](pic/Sample.PNG)
 
-- 收发包函数定位：`Spawn`和`attach`模式均默认开启；
+- Send and receive packet function positioning: `Spawn`and `attach`mode are enabled by default;
 
-> 可以使用`python r0capture.py -U -f cn.soulapp.android -v  >> soul3.txt`这样的命令将输出重定向至txt文件中稍后过滤内容
+> The output of `python r0capture.py -U -f cn.soulapp.android -v >> soul3.txt` can be redirected to a txt file with a command like this to filter the content later.
 
 ![](pic/locator.png)
 
-- 客户端证书导出功能：默认开启；必须以Spawm模式运行；
+- Client certificate export function: enabled by default; must run in Spawm mode;
 
-> 运行脚本之前必须手动给App加上存储卡读写权限；
+> Before running the script, you must manually add read and write permissions to the memory card to the App;
 
-> 并不是所有App都部署了服务器验证客户端的机制，只有配置了的才会在Apk中包含客户端证书
+> Not all apps have deployed a mechanism for the server to verify the client, only the configured ones will include the client certificate in the Apk
 
-> 导出后的证书位于/sdcard/Download/包名xxx.p12路径，导出多次，每一份均可用，密码默认为：r0ysue，推荐使用[keystore-explorer](http://keystore-explorer.org/)打开查看证书。
+> The exported certificate is located in the path /sdcard/Download/package name xxx.p12. After exporting multiple times, each copy is available. The default password is: r0ysue. It is recommended to use [keystore-explorer](http://keystore-explorer.org/) to open and view the certificate.
 
 ![](pic/clientcer.png)
 
-- 新增host连接方式“-H”，用于Frida-server监听在非标准端口时的连接。有些App会检测Frida标准端口，因此frida-server开在非标准端口可以绕过检测。
+- Added host connection method "-H" for Frida-server to monitor connections on non-standard ports. Some apps will detect Frida standard ports, so opening frida-server on non-standard ports can bypass the detection.
 
 ![](pic/difport.png)
 
-## 感谢[爱吃菠菜](https://bbs.pediy.com/user-760871.htm)巨巨总结的本项目知识点
+> This project is based on [frida_ssl_logger](https://github.com/BigFaceCat2017/frida_ssl_logger), the reason for the name change is that the focus is different. The focus of the original project is to capture ssl and cross-platform, the focus of this project is to capture all packets.
 
-![](pic/summary1.jpg)
-![](pic/summary2.jpg)
+> Limitations: Some major manufacturers or frameworks with strong development capabilities use their own SSL frameworks, such as WebView, applet or Flutter, which are not currently supported. Some integrated apps are not Android apps in essence, they do not use the framework of the Android system and cannot be supported. Of course, this part of the app is also a minority. It does not support HTTP/2 or HTTP/3 at the moment. This part of the API has not yet been popularized or deployed on the Android system. It comes with the App and cannot be used for general hooking. The architecture, implementation and environment of various simulators are relatively complex. It is recommended to cherish life and use real machines. Multi-process support has not been added yet, such as child processes such as :service or :push, you can use Frida's Child-gating to support it. After supporting multiple processes, the write lock of the pcap file should be considered. You can use the Reactor thread lock of frida-tool to support it.
 
+### What's improved
 
-PS：
+1. Optimized frida JS script and fixed syntax errors on the new version of frida;
+2. Adjusted the JS script to make it compatible with iOS and macOS, and also compatible with Android;
+3. Added more options so that it can be used in a variety of situations;
 
-> 这个项目基于[frida_ssl_logger](https://github.com/BigFaceCat2017/frida_ssl_logger)，之所以换个名字，只是侧重点不同。 原项目的侧重点在于抓ssl和跨平台，本项目的侧重点是抓到所有的包。
+### Install dependencies
 
-> 局限：部分开发实力过强的大厂或框架，采用的是自身的SSL框架，比如WebView、小程序或Flutter，这部分目前暂未支持。部分融合App本质上已经不属于安卓App，没有使用安卓系统的框架，无法支持。当然这部分App也是少数。暂不支持HTTP/2、或HTTP/3，该部分API在安卓系统上暂未普及或布署，为App自带，无法进行通用hook。各种模拟器架构、实现、环境较为复杂，建议珍爱生命、使用真机。暂未添加多进程支持，比如:service或:push等子进程，可以使用Frida的Child-gating来支持一下。支持多进程之后要考虑pcap文件的写入锁问题，可以用frida-tool的Reactor线程锁来支持一下。
-
-## 以下是原项目的简介：
-
-[https://github.com/BigFaceCat2017/frida_ssl_logger](https://github.com/BigFaceCat2017/frida_ssl_logger)
-
-### frida_ssl_logger
-ssl_logger based on frida
-for from https://github.com/google/ssl_logger
-
-### 修改内容
-1. 优化了frida的JS脚本，修复了在新版frida上的语法错误；
-2. 调整JS脚本，使其适配iOS和macOS，同时也兼容了Android；
-3. 增加了更多的选项，使其能在多种情况下使用；
-
-### 安装依赖
 ```
-Python版本>=3.6
+Python version >= 3.6
 pip install loguru
 pip install click
 ```
+
 ### Usage
-  ```shell
-    python3 ./ssl_logger.py  -U -f com.bfc.mm
-    python3 ./ssl_logger.py -v  -p test.pcap  6666
-  ````
+```shell
+python ./ssl_logger.py  -U -f com.bfc.mm
+python ./ssl_logger.py -v  -p test.pcap  6666
+```
+
+### References:
+
+[**frida_ssl_logger**](https://github.com/BigFaceCat2017/frida_ssl_logger)  
+ssl_logger based on https://github.com/google/ssl_logger
 
