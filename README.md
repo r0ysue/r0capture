@@ -62,20 +62,22 @@ It is recommended to use the `Attach` mode, start capturing packets from the pla
 2. Adjusted the JS script to make it compatible with iOS and macOS, and also compatible with Android;
 3. Added more options so that it can be used in a variety of situations;
 
+
 ### Install dependencies
 
-```
+```shell
 Python version >= 3.6
 pip install loguru
 pip install click
 ```
+
+
 ### Usage
+
 ```shell
-python ./ssl_logger.py  -U -f com.bfc.mm
-python ./ssl_logger.py -v  -p test.pcap  6666
+python ./ssl_logger.py -U -f com.bfc.mm
+python ./ssl_logger.py -v -p test.pcap  6666
 ```
-  
-  
 ### References:
 
 [**frida_ssl_logger**](https://github.com/BigFaceCat2017/frida_ssl_logger)  
