@@ -69,13 +69,13 @@ Python version >= 3.6
 pip install loguru
 pip install click
 ```
-
 ### Usage
 ```shell
 python ./ssl_logger.py  -U -f com.bfc.mm
 python ./ssl_logger.py -v  -p test.pcap  6666
 ```
-
+  
+  
 ### References:
 
 [**frida_ssl_logger**](https://github.com/BigFaceCat2017/frida_ssl_logger)  
