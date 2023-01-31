@@ -370,7 +370,7 @@ Examples:
                       help="if spawned app")
     args.add_argument("-wait", "-w", type=int, metavar="<seconds>", default=0,
                       help="Time to wait for the process")
-    args.add_argument("--isForward", "-F", metavar="<[http|https|socks5]://127.0.0.1:8080>", required=False,
+    args.add_argument("--isForward", "-F", metavar="<http|https>://<host>:<port>", required=False,
                       help="Forward http request to proxy host")
 
     parsed = parser.parse_args()
