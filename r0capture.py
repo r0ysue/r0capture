@@ -129,9 +129,6 @@ def show_banner():
 #                                  <bytes sent by server>)
 ssl_sessions = {}
 
-# Forward Proxy Listener Host
-proxies = {}
-
 def ssl_log(process, pcap=None, host=False, verbose=False, isUsb=False, ssllib="", isSpawn=True, wait=0, isForward=False):
     """Decrypts and logs a process's SSL traffic.
     Hooks the functions SSL_read() and SSL_write() in a given process and logs
