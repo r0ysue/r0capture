@@ -26,13 +26,14 @@
 
 - Spawn 模式：
 
-`$ python3 r0capture.py -U -f com.qiyi.video -v`
+`$ python3 r0capture.py -U -f com.coolapk.market -v`
 
-- Attach 模式，抓包内容保存成pcap文件供后续分析：
+- Attach 模式，抓包内容保存成pcap文件供后续分析： 
 
-`$ python3 r0capture.py -U com.qiyi.video -v -p iqiyi.pcap`
+`$ python3 r0capture.py -U 酷安 -v -p iqiyi.pcap` 
 
 建议使用`Attach`模式，从感兴趣的地方开始抓包，并且保存成`pcap`文件，供后续使用Wireshark进行分析。
+> 老版本Frida使用包名，新版本Frida使用APP名。APP名必须是点开app后，frida-ps -U显示的那个app名字。
 
 ![](pic/Sample.PNG)
 
