@@ -62,6 +62,8 @@ from pathlib import Path
 import frida
 from loguru import logger
 
+from forwarder import Forwarder
+
 try:
     if os.name == 'nt':
         import win_inet_pton
@@ -127,8 +129,7 @@ def show_banner():
 #                                  <bytes sent by server>)
 ssl_sessions = {}
 
-
-def ssl_log(process, pcap=None, host=False, verbose=False, isUsb=False, ssllib="", isSpawn=True, wait=0):
+def ssl_log(process, pcap=None, host=False, verbose=False, isUsb=False, ssllib="", isSpawn=True, wait=0, isForward=False):
     """Decrypts and logs a process's SSL traffic.
     Hooks the functions SSL_read() and SSL_write() in a given process and logs
     the decrypted data to the console and/or to a pcap file.
@@ -243,7 +244,15 @@ def ssl_log(process, pcap=None, host=False, verbose=False, isUsb=False, ssllib="
         if pcap:
             log_pcap(pcap_file, p["ssl_session_id"], p["function"], p["src_addr"],
                      p["src_port"], p["dst_addr"], p["dst_port"], data)
+        if isForward:
+            _forwarder.forward(message, data)
 
+    if isForward:
+        try:
+            _forwarder = Forwarder(isForward)
+        except Exception as e:
+            print('Please check forward proxy host format.')
+            exit()
     if isUsb:
         try:
             device = frida.get_usb_device()
@@ -358,6 +367,8 @@ Examples:
                       help="if spawned app")
     args.add_argument("-wait", "-w", type=int, metavar="<seconds>", default=0,
                       help="Time to wait for the process")
+    args.add_argument("--isForward", "-F", metavar="<http|https>://<host>:<port>", required=False,
+                      help="Forward http request to proxy host")
 
     parsed = parser.parse_args()
     logger.add(f"{parsed.process.replace('.','_')}-{int(time.time())}.log", rotation="500MB", encoding="utf-8", enqueue=True, retention="10 days")
@@ -370,5 +381,6 @@ Examples:
         isUsb=parsed.isUsb,
         isSpawn=parsed.isSpawn,
         ssllib=parsed.ssl,
-        wait=parsed.wait
+        wait=parsed.wait,
+        isForward=parsed.isForward
     )
