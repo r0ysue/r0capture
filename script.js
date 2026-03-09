@@ -68,7 +68,7 @@ function initializeGlobals() {
     for (var j = 0; j < names.length; j++) {
       var name = names[j];
       // console.log("exports:" + lib + "!" + name)
-      var matches = resolver.enumerateMatchesSync("exports:" + lib + "!" + name);
+      var matches = resolver.enumerateMatches("exports:" + lib + "!" + name);
       if (matches.length == 0) {
         if (name == "SSL_get_fd") {
           addresses["SSL_get_fd"] = 0;
@@ -76,28 +76,25 @@ function initializeGlobals() {
         }
         throw "Could not find " + lib + "!" + name;
       }
-      else if (matches.length != 1) {
-        // Sometimes Frida returns duplicates.
-        var address = 0;
-        var s = "";
-        var duplicates_only = true;
+      else if (matches.length > 1) {
+        // Multiple matches found - prefer com.android.conscrypt library
+        var selectedMatch = null;
         for (var k = 0; k < matches.length; k++) {
-          if (s.length != 0) {
-            s += ", ";
-          }
-          s += matches[k].name + "@" + matches[k].address;
-          if (address == 0) {
-            address = matches[k].address;
-          }
-          else if (!address.equals(matches[k].address)) {
-            duplicates_only = false;
+          if (matches[k].name.indexOf("com.android.conscrypt") !== -1) {
+            selectedMatch = matches[k];
+            break;
           }
         }
-        if (!duplicates_only) {
-          throw "More than one match found for " + lib + "!" + name + ": " + s;
+        // If no conscrypt match, use the first one
+        if (selectedMatch === null) {
+          selectedMatch = matches[0];
         }
+        addresses[name] = selectedMatch.address;
+        console.log("[*] Selected " + name + " from: " + selectedMatch.name);
       }
-      addresses[name] = matches[0].address;
+      else {
+        addresses[name] = matches[0].address;
+      }
     }
   }
   if (addresses["SSL_get_fd"] == 0) {
@@ -175,13 +172,13 @@ function getSslSessionId(ssl) {
   }
   var len = Memory.alloc(4);
   var p = SSL_SESSION_get_id(session, len);
-  len = Memory.readU32(len);
+  len = len.readU32();
   var session_id = "";
   for (var i = 0; i < len; i++) {
     // Read a byte, convert it to a hex string (0xAB ==> "AB"), and append
     // it to session_id.
     session_id +=
-      ("0" + Memory.readU8(p.add(i)).toString(16).toUpperCase()).substr(-2);
+      ("0" + p.add(i).readU8().toString(16).toUpperCase()).slice(-2);
   }
   return session_id;
 }
@@ -201,7 +198,7 @@ Interceptor.attach(addresses["SSL_read"],
       if (retval <= 0) {
         return;
       }
-      send(this.message, Memory.readByteArray(this.buf, retval));
+      send(this.message, this.buf.readByteArray(retval));
     }
   });
 
@@ -212,13 +209,13 @@ Interceptor.attach(addresses["SSL_write"],
       message["ssl_session_id"] = getSslSessionId(args[0]);
       message["function"] = "SSL_write";
       message["stack"] = SSLstackwrite;
-      send(message, Memory.readByteArray(args[1], parseInt(args[2])));
+      send(message, args[1].readByteArray(parseInt(args[2])));
     },
     onLeave: function (retval) {
     }
   });
 
-if (Java.available) {
+if (typeof Java !== 'undefined' && Java.available) {
   Java.perform(function () {
     function storeP12(pri, p7, p12Path, p12Password) {
       var X509Certificate = Java.use("java.security.cert.X509Certificate")
@@ -285,8 +282,8 @@ if (Java.available) {
       message["stack"] = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Throwable").$new()).toString();
       var ptr = Memory.alloc(byteCount);
       for (var i = 0; i < byteCount; ++i)
-        Memory.writeS8(ptr.add(i), bytearry[offset + i]);
-      send(message, Memory.readByteArray(ptr, byteCount))
+        ptr.add(i).writeU8(bytearry[offset + i] & 0xFF);
+      send(message, ptr.readByteArray(byteCount))
       return result;
     }
     Java.use("java.net.SocketInputStream").socketRead0.overload('java.io.FileDescriptor', '[B', 'int', 'int', 'int').implementation = function (fd, bytearry, offset, byteCount, timeout) {
@@ -302,8 +299,8 @@ if (Java.available) {
       if (result > 0) {
         var ptr = Memory.alloc(result);
         for (var i = 0; i < result; ++i)
-          Memory.writeS8(ptr.add(i), bytearry[offset + i]);
-        send(message, Memory.readByteArray(ptr, result))
+          ptr.add(i).writeU8(bytearry[offset + i] & 0xFF);
+        send(message, ptr.readByteArray(result))
       }
       return result;
     }
