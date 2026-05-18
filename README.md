@@ -1,5 +1,7 @@
 # r0capture
 
+**中文** | [English](README.en.md) | [Tiếng Việt](README.vi.md)
+
 安卓应用层抓包通杀脚本
 
 ## 简介
